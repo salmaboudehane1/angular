@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@^2.2/dist/tailwind.min.css" rel="stylesheet">
+    <title>Book Reading Tracker</title>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto p-5">
+        <h1 class="text-2xl font-bold mb-4">Book Reading Tracker</h1>
+        <form id="bookForm" class="bg-white p-6 rounded shadow-md">
+            <div class="mb-4">
+                <label for="title" class="block text-gray-700">Title</label>
+                <input type="text" id="title" required class="mt-1 block w-full p-2 border border-gray-300 rounded">
+            </div>
+            <div class="mb-4">
+                <label for="author" class="block text-gray-700">Author</label>
+                <input type="text" id="author" required class="mt-1 block w-full p-2 border border-gray-300 rounded">
+            </div>
+            <div class="mb-4">
+                <label for="numberOfPages" class="block text-gray-700">Number of Pages</label>
+                <input type="number" id="numberOfPages" required class="mt-1 block w-full p-2 border border-gray-300 rounded">
+            </div>
+            <div class="mb-4">
+                <label for="status" class="block text-gray-700">Status</label>
+                <select id="status" required class="mt-1 block w-full p-2 border border-gray-300 rounded">
+                    <option value="Read">Read</option>
+                    <option value="Re-read">Re-read</option>
+                    <option value="DNF">DNF</option>
+                    <option value="Currently reading">Currently reading</option>
+                    <option value="Returned Unread">Returned Unread</option>
+                    <option value="Want to read">Want to read</option>
+                </select>
+            </div>
+            <div class="mb-4">
+                <label for="price" class="block text-gray-700">Price</label>
+                <input type="number" id="price" required class="mt-1 block w-full p-2 border border-gray-300 rounded">
+            </div>
+            <div class="mb-4">
+                <label for="pagesRead" class="block text-gray-700">Pages Read</label>
+                <input type="number" id="pagesRead" required class="mt-1 block w-full p-2 border border-gray-300 rounded">
+            </div>
+            <div class="mb-4">
+                <label for="format" class="block text-gray-700">Format</label>
+                <select id="format" required class="mt-1 block w-full p-2 border border-gray-300 rounded">
+                    <option value="Print">Print</option>
+                    <option value="PDF">PDF</option>
+                    <option value="Ebook">Ebook</option>
+                    <option value="AudioBook">AudioBook</option>
+                </select>
+            </div>
+            <div class="mb-4">
+                <label for="suggestedBy" class="block text-gray-700">Suggested By</label>
+                <input type="text" id="suggestedBy" required class="mt-1 block w-full p-2 border border-gray-300 rounded">
+            </div>
+            <button type="submit" class="bg-blue-500 text-white p-2 rounded">Add Book</button>
+        </form>
+    </div>
+    <script>
+        const bookForm = document.getElementById('bookForm');
+        bookForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            // Logic to submit the form and save to MongoDB
+        });
+    </script>
+</body>
+</html>

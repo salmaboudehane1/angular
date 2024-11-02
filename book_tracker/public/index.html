@@ -1,0 +1,200 @@
+<!-- public/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Reading Tracker</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+</head>
+<body>
+    <div class="container mx-auto p-4 pt-6 md:p-6 lg:p-12">
+        <h1 class="text-3xl font-bold mb-4">Book Reading Tracker</h1>
+        <form id="book-form">
+            <div class="mb-4">
+                <label for="title" class="block text-gray-700 text-sm font-bold mb-2">Title</label>
+                <input type="text" id="title" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+            </div>
+            <div class="mb-4">
+                <label for="author" class="block text-gray-700 text-sm font-bold mb-2">Author</label>
+                <input type="text" id="author" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+            </div>
+            <div class="mb-4">
+                <label for="numberOfPages" class="block text-gray-700 text-sm font-bold mb-2">Number of Pages</label>
+                <input type="number" id="pages" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+            </div>
+            <div class="mb-4">
+                <label for="status" class="block text-gray-700 text-sm font-bold mb-2">Status</label>
+                <select id="status" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    <option value="Read">Read</option>
+                    <option value="Re-read">Re-read</option>
+                    <option value="DNF">DNF</option>
+                    <option value="Currently reading">Currently reading</option>
+                    <option value="Returned Unread">Returned Unread</option>
+                    <option value="Want to read">Want to read</option>
+                </select>
+            </div>
+            <div class="mb-4">
+                <label for="price" class="block text-gray-700 text-sm font-bold mb-2">Price</label>
+                <input type="number" id="price" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+            </div>
+            <div class="mb-4">
+                <label for="pagesRead" class="block text-gray-700 text-sm font-bold mb-2">Pages Read</label>
+                <input type="number" id="pagesRead" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+            </div>
+            <div class="mb-4">
+                <label for="format" class="block text-gray-700 text-sm font-bold mb-2">Format</label>
+                <select id="format" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    <option value="Print">Print</option>
+                    <option value="PDF">PDF</option>
+                    <option value="Ebook">Ebook</option>
+                    <option value="AudioBook">AudioBook</option>
+                </select>
+            </div>
+            <div class="mb-4">
+                <label for="suggestedBy" class="block text-gray-700 text-sm font-bold mb-2">Suggested By</label>
+                <input type="text" id="suggestedBy" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+            </div>
+            <button class="bg-red hover:bg-orange-700 text-black font-bold py-2 px-4 rounded " type="submit">Add Book</button>
+        </form>
+        <div id="book-list">
+            <!-- Book list will be displayed here -->
+        </div>
+        <div id="global-summary" class="bg-gray-100 p-4 rounded-lg mb-4">
+            <h2 class="text-xl font-bold">Global Summary</h2>
+            <p id="total-books" class="text-gray-700">Total Books Read: 0</p>
+            <p id="total-pages" class="text-gray-700">Total Pages Read: 0</p>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('book-form'); // Ensure the form ID matches
+        const bookList = document.getElementById('book-list'); // Ensure the book list ID matches
+        const totalBooksElem = document.getElementById('total-books'); // Total books element
+        const totalPagesElem = document.getElementById('total-pages'); 
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const title = document.getElementById('title').value;
+            const author = document.getElementById('author').value;
+            const numberOfPages = parseInt(document.getElementById('pages').value); // Changed to match the input ID
+            const status = document.getElementById('status').value;
+            const price = parseFloat(document.getElementById('price').value);
+            const pagesRead = parseInt(document.getElementById('pagesRead').value);
+            const format = document.getElementById('format').value;
+            const suggestedBy = document.getElementById('suggestedBy').value;
+    
+            try {
+                const response = await fetch('/api/books', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title, author, numberOfPages, status, price, pagesRead, format, suggestedBy })
+                });
+                const book = await response.json();
+                refreshBookList();
+
+                // Calculate the percentage of pages read
+                const percentageRead = ((book.pagesRead / book.numberOfPages) * 100).toFixed(2);
+    
+                // Construct the HTML for the new book
+                const bookHTML = `
+                    <div class="bg-white shadow-md rounded-lg p-4 mb-4" data-id="${book._id}">
+                        <h2 class="text-xl font-semibold">${book.title}</h2>
+                        <p class="text-gray-700">Author: <span class="font-medium">${book.author}</span></p>
+                        <p class="text-gray-700">Status: <span class="font-medium">${book.status}</span></p>
+                        <p class="text-gray-700">Pages Read: <span class="font-medium">${book.pagesRead}</span> / <span class="font-medium">${book.numberOfPages}</span></p>
+                        <p class="text-gray-700">Format: <span class="font-medium">${book.format}</span></p>
+                        <p class="text-gray-700">Suggested By: <span class="font-medium">${book.suggestedBy}</span></p>
+                        <div class="mt-2">
+                            <div class="bg-gray-200 rounded-full h-2">
+                                <div class="bg-green-500 h-2 rounded-full" style="width: ${percentageRead}%"></div>
+                            </div>
+                            <p class="text-gray-600 text-sm mt-1">${percentageRead}% read</p>
+                        </div>
+                        <div class="mt-4">
+                            <button class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded" onclick="deleteBook('${book._id}')">Delete</button>
+                        </div>
+                    </div>
+                `;
+                bookList.innerHTML += bookHTML; // Append the new book to the list
+            } catch (error) {
+                console.error('Error adding book:', error);
+            }
+        });
+    
+        async function deleteBook(id) {
+            try {
+                await fetch(`/api/books/${id}`, { method: 'DELETE' });
+                const bookElement = document.querySelector(`[data-id="${id}"]`);
+                if (bookElement) {
+                    bookElement.remove(); // Remove the book from the DOM
+                    refreshBookList();
+
+                }
+            } catch (error) {
+                console.error('Error deleting book:', error);
+            }
+        }
+    
+        async function getBooks() {
+            try {
+                const response = await fetch('/api/books');
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const books = await response.json();
+                return books; // Ensure we return an array or an empty array if something goes wrong
+            } catch (error) {
+                console.error('Error fetching books:', error);
+                return []; // Return an empty array in case of error
+            }
+        }
+
+        async function refreshBookList() {
+            const books = await getBooks();
+            bookList.innerHTML = ''; // Clear the current book list
+            let totalBooks = 0;
+            let totalPagesRead = 0;
+
+            if (Array.isArray(books)) { // Check if books is an array
+                books.forEach((book) => {
+                    const percentageRead = ((book.pagesRead / book.numberOfPages) * 100).toFixed(2);
+                    const bookHTML = `
+                        <div class="bg-white shadow-md rounded-lg p-4 mb-4" data-id="${book._id}">
+                            <h2 class="text-xl font-semibold">${book.title}</h2>
+                            <p class="text-gray-700">Author: <span class="font-medium">${book.author}</span></p>
+                            <p class="text-gray-700">Status: <span class="font-medium">${book.status}</span></p>
+                            <p class="text-gray-700">Pages Read: <span class="font-medium">${book.pagesRead}</span> / <span class="font-medium">${book.numberOfPages}</span></p>
+                            <p class="text-gray-700">Format: <span class="font-medium">${book.format}</span></p>
+                            <p class="text-gray-700">Suggested By: <span class="font-medium">${book.suggestedBy}</span></p>
+                            <div class="mt-2">
+                                <div class="bg-gray-200 rounded-full h-2">
+                                    <div class="bg-green-500 h-2 rounded-full" style="width: ${percentageRead}%"></div>
+                                </div>
+                                <p class="text-gray-600 text-sm mt-1">${percentageRead}% read</p>
+                            </div>
+                            <div class="mt-4">
+                                <button class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded" onclick="deleteBook('${book._id}')">Delete</button>
+                            </div>
+                        </div>
+                    `;
+                    bookList.innerHTML += bookHTML; // Append the book to the list
+                    totalBooks++; // Increment the total books count
+                    totalPagesRead += book.pagesRead; // Sum the pages read
+                });
+
+                // Update the global summary
+                totalBooksElem.textContent = `Total Books Read: ${totalBooks}`;
+                totalPagesElem.textContent = `Total Pages Read: ${totalPagesRead}`;
+            } else {
+                console.warn('Expected books to be an array, but got:', books);
+                totalBooksElem.textContent = `Total Books Read: 0`;
+                totalPagesElem.textContent = `Total Pages Read: 0`;
+            }
+        }
+    
+        getBooks(); // Fetch and display the books on page load
+        refreshBookList();
+    </script>
+</body>
+</html>
